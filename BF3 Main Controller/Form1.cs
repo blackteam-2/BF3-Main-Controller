@@ -183,11 +183,11 @@ namespace BF3_Main_Controller
 
                         while (!pas.EndOfData)
                         {
-                            UpdateDebug("Read Line: " + i.ToString() + "\n");
+                            Console.WriteLine("Read Line: " + i.ToString() + "\n");
                             string[] feilds = pas.ReadFields();
                             for (int j = 0; j < feilds.Length; j++)
                             {
-                                UpdateDebug(feilds[j]);
+                                Console.WriteLine(feilds[j]);
                             }
 
                             //myTagList[i].ID = Convert.ToInt32(feilds[0]);
@@ -200,9 +200,10 @@ namespace BF3_Main_Controller
                             //feilds[6] = feilds[6].Replace("","0");
                             myTagList.Add(new RFIDTagList(Convert.ToInt32(feilds[0]), Convert.ToInt32(feilds[1]), Convert.ToString(feilds[2]),
                                 Convert.ToString(feilds[3]), Convert.ToString(feilds[4]), Convert.ToString(feilds[5]),
-                                Convert.ToBoolean(Convert.ToInt16(feilds[6]))));
+                                //Convert.ToBoolean(Convert.ToInt16(feilds[6]))));
+                                Convert.ToBoolean(feilds[6])));
 
-                            UpdateDebug("\r\n");
+                            Console.WriteLine("\r\n");
                             i++;
                         }
                     }
@@ -230,11 +231,11 @@ namespace BF3_Main_Controller
 
                         while (!pas.EndOfData)
                         {
-                            UpdateDebug("Read Line: " + i.ToString() + "\n");
+                            Console.WriteLine("Read Line: " + i.ToString() + "\n");
                             string[] feilds = pas.ReadFields();
                             for (int j = 0; j < feilds.Length; j++)
                             {
-                                UpdateDebug(feilds[j]);
+                                Console.WriteLine(feilds[j]);
                             }
 
                             //myTagList[i].ID = Convert.ToInt32(feilds[0]);
@@ -246,9 +247,10 @@ namespace BF3_Main_Controller
                             //myTagList[i].InUse = Convert.ToBoolean(feilds[6]);
                             //feilds[6] = feilds[6].Replace("","0");
                             myAddyList.Add(new AddyList(Convert.ToInt32(feilds[0]), Convert.ToString(feilds[1]),
-                                Convert.ToString(feilds[2]), Convert.ToBoolean(Convert.ToInt16(feilds[3])), Convert.ToString(feilds[4])));
+                                //Convert.ToString(feilds[2]), Convert.ToBoolean(Convert.ToInt16(feilds[3])), Convert.ToString(feilds[4])));
+                                Convert.ToString(feilds[2]), Convert.ToBoolean(feilds[3]), Convert.ToString(feilds[4])));
 
-                            UpdateDebug("\r\n");
+                            Console.WriteLine("\r\n");
                             i++;
                         }
                     }
@@ -261,14 +263,85 @@ namespace BF3_Main_Controller
 
         private void button1_Click(object sender, EventArgs e)
         {
-            UpdateDebug("trying RFID test");
+            Console.WriteLine("trying RFID test");
             ReadRFIDFile();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            UpdateDebug("trying Addy test");
+            Console.WriteLine("trying Addy test");
             ReadAddyFile();
         }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+            label8.Text = this.Size.Height.ToString();
+            label9.Text = this.Size.Width.ToString();
+            Console.WriteLine("TEST");
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            ExtractDataToCSV(dgvRFID);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            ExtractDataToCSV(dgvAddy);
+        }
+
+        private void ExtractDataToCSV(DataGridView dgv)
+        {
+
+            // Don't save if no data is returned
+            if (dgv.Rows.Count == 0)
+            {
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            // Column headers
+            string columnsHeader = "";
+            for (int i = 0; i < dgv.Columns.Count; i++)
+            {
+                columnsHeader += dgv.Columns[i].Name + ",";
+            }
+            columnsHeader = columnsHeader.Replace("DataGridViewTextBoxColumn", "");
+            columnsHeader = columnsHeader.Replace("DataGridViewCheckBoxColumn", "");
+            Console.WriteLine(columnsHeader);
+            sb.Append(columnsHeader + Environment.NewLine);
+            // Go through each cell in the datagridview
+            foreach (DataGridViewRow dgvRow in dgv.Rows)
+            {
+                // Make sure it's not an empty row.
+                if (!dgvRow.IsNewRow)
+                {
+                    for (int c = 0; c < dgvRow.Cells.Count; c++)
+                    {
+                        // Append the cells data followed by a comma to delimit.
+
+                        sb.Append(dgvRow.Cells[c].Value + ",");
+                    }
+                    // Add a new line in the text file.
+                    sb.Append(Environment.NewLine);
+                }
+            }
+            // Load up the save file dialog with the default option as saving as a .csv file.
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "CSV files (*.csv)|*.csv";
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                // If they've selected a save location...
+                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(sfd.FileName, false))
+                {
+                    // Write the stringbuilder text to the the file.
+                    sw.WriteLine(sb.ToString());
+                    // Confirm to the user it has been completed.
+                    MessageBox.Show("CSV file saved.");
+                }
+            }
+            
+        }
+
+        
     }
 }
