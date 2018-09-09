@@ -11,23 +11,31 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace BF3_Main_Controller
 {
-    public partial class frmMainMenu : Form
+    partial class frmMainMenu : Form
     {
         private EventHandler<TextArgs> updateDisplayEventHan;
+        private EventHandler<TextArgs> updateSerHanEventHan;
 
         private BindingSource myTagList = new BindingSource();
         private BindingSource myAddyList = new BindingSource();
 
+        private serialHandle mySerHan;
         private SerialPort mySerial = new SerialPort();
 
-        public frmMainMenu()
+        public frmMainMenu(SerialPort serial)
         {
             InitializeComponent();
+            mySerial = serial;
         }
 
         private void frmMainMenu_Load(object sender, EventArgs e)
         {
             updateDisplayEventHan += new EventHandler<TextArgs>(UpdateDebugDisplay);
+
+            mySerHan = new serialHandle(mySerial);
+
+            mySerHan.updateFormEventHan += new EventHandler<TextArgs>(UpdateDebugDisplay);
+            updateSerHanEventHan += new EventHandler<TextArgs>(mySerHan.handleEvent);
 
             dgvRFID.DataSource = myTagList;
             dgvAddy.DataSource = myAddyList;
@@ -37,6 +45,15 @@ namespace BF3_Main_Controller
         {
             EventHandler<TextArgs> temp = updateDisplayEventHan;
             if(temp != null)
+            {
+                temp(null, new TextArgs(mes));
+            }
+        }
+
+        private void UpdateSerHan(string mes)
+        {
+            EventHandler<TextArgs> temp = updateSerHanEventHan;
+            if (temp != null)
             {
                 temp(null, new TextArgs(mes));
             }
@@ -57,111 +74,111 @@ namespace BF3_Main_Controller
 
         //------------------------------- Test Serial -------------------------------------
 
-        private void TestComPorts()
-        {
-            if (!mySerial.IsOpen)
-            {
-                int prevBaud = mySerial.BaudRate;
-                CBCom.Items.Clear();
-                mySerial.BaudRate = 9600;
-                mySerial.Parity = System.IO.Ports.Parity.None;
-                mySerial.StopBits = System.IO.Ports.StopBits.One;
-                mySerial.DtrEnable = true;
-                mySerial.RtsEnable = true;
-                mySerial.ReceivedBytesThreshold = 2;
-                mySerial.ReadTimeout = 2000;
-                //serialPort.NewLine = "\n";
+        //private void TestComPorts()
+        //{
+        //    if (!mySerial.IsOpen)
+        //    {
+        //        int prevBaud = mySerial.BaudRate;
+        //        CBCom.Items.Clear();
+        //        mySerial.BaudRate = 9600;
+        //        mySerial.Parity = System.IO.Ports.Parity.None;
+        //        mySerial.StopBits = System.IO.Ports.StopBits.One;
+        //        mySerial.DtrEnable = true;
+        //        mySerial.RtsEnable = true;
+        //        mySerial.ReceivedBytesThreshold = 2;
+        //        mySerial.ReadTimeout = 2000;
+        //        //serialPort.NewLine = "\n";
 
-                for (int i = 0; i < 30; i++)
-                {
-                    string s = "COM" + Convert.ToString(i);
-                    mySerial.PortName = s;
+        //        for (int i = 0; i < 30; i++)
+        //        {
+        //            string s = "COM" + Convert.ToString(i);
+        //            mySerial.PortName = s;
 
-                    if (!mySerial.IsOpen)
-                    {
-                        try
-                        {
-                            mySerial.Open();
-                            CBCom.Items.Add(s);
-                            mySerial.Close();
-                        }
-                        catch
-                        {
-                            //Serial port is not accessable
-                        }
-                    }
-                }
+        //            if (!mySerial.IsOpen)
+        //            {
+        //                try
+        //                {
+        //                    mySerial.Open();
+        //                    CBCom.Items.Add(s);
+        //                    mySerial.Close();
+        //                }
+        //                catch
+        //                {
+        //                    //Serial port is not accessable
+        //                }
+        //            }
+        //        }
 
-                mySerial.BaudRate = prevBaud;
-            }
-        }
+        //        mySerial.BaudRate = prevBaud;
+        //    }
+        //}
 
-        private void CBCom_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (!mySerial.IsOpen) { TestComPorts(); }
-        }
+        //private void CBCom_MouseDown(object sender, MouseEventArgs e)
+        //{
+        //    if (!mySerial.IsOpen) { TestComPorts(); }
+        //}
 
-        //------------------------------ Serial Port -------------------------------------
+        ////------------------------------ Serial Port -------------------------------------
 
-        private void btnComConnect_Click(object sender, EventArgs e)
-        {
-            if (!mySerial.IsOpen)
-            {
-                //Try to open the serial port
-                try
-                {
-                    //serialPort.PortName = CBCom.Items[CBCom.SelectedIndex].ToString();
-                    mySerial.PortName = CBCom.Text;
-                    mySerial.BaudRate = Convert.ToInt32(CBBaud.Text);
-                    mySerial.DataBits = Convert.ToInt32(CBDataBits.Text);
-                    mySerial.StopBits = (StopBits)Enum.Parse(typeof(StopBits), CBStopBits.Text);
-                    mySerial.Parity = (Parity)Enum.Parse(typeof(Parity), CBPairity.Text);
-                    mySerial.DtrEnable = ChBxDTR.Checked;
-                    mySerial.RtsEnable = ChBxRTS.Checked;
-                    mySerial.ReceivedBytesThreshold = 5;
-                    mySerial.ReadTimeout = 2000;
-                    mySerial.WriteTimeout = 1000;
+        //private void btnComConnect_Click(object sender, EventArgs e)
+        //{
+        //    if (!mySerial.IsOpen)
+        //    {
+        //        //Try to open the serial port
+        //        try
+        //        {
+        //            //serialPort.PortName = CBCom.Items[CBCom.SelectedIndex].ToString();
+        //            mySerial.PortName = CBCom.Text;
+        //            mySerial.BaudRate = Convert.ToInt32(CBBaud.Text);
+        //            mySerial.DataBits = Convert.ToInt32(CBDataBits.Text);
+        //            mySerial.StopBits = (StopBits)Enum.Parse(typeof(StopBits), CBStopBits.Text);
+        //            mySerial.Parity = (Parity)Enum.Parse(typeof(Parity), CBPairity.Text);
+        //            mySerial.DtrEnable = ChBxDTR.Checked;
+        //            mySerial.RtsEnable = ChBxRTS.Checked;
+        //            mySerial.ReceivedBytesThreshold = 5;
+        //            mySerial.ReadTimeout = 2000;
+        //            mySerial.WriteTimeout = 1000;
 
-                    mySerial.Open();
-                    mySerial.ReadExisting();
-                    btnComConnect.Text = "Disconnect";
-                    btnComConnect.BackColor = Color.SpringGreen;
-                    //SerialToolStripLabel.Text = "Serial Status: Connected ; " + CBCom.Items[CBCom.SelectedIndex].ToString() +
-                    //    ", " + serialPort.BaudRate +
-                    //    ", " + serialPort.DataBits +
-                    //    ", " + serialPort.StopBits +
-                    //    ", " + serialPort.Parity;
-                    UpdateDebug("Serial Connected - " + CBCom.Items[CBCom.SelectedIndex].ToString() + " : " + mySerial.BaudRate + "\n");
-                    grBCom.Enabled = false;
-                }
-                catch (UnauthorizedAccessException SerialException)
-                {
-                    MessageBox.Show(SerialException.ToString(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                catch (System.IO.IOException SerialException)
-                {
-                    MessageBox.Show(SerialException.ToString(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    mySerial.Close();
-                }
-                catch (InvalidOperationException SerialException)
-                {
-                    MessageBox.Show(SerialException.ToString(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    mySerial.Close();
-                }
-                catch (Exception xxx)
-                {
-                    MessageBox.Show("Unkonown Error\n" + xxx.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    mySerial.Close();
-                }
-            }
-            else
-            {
-                mySerial.Close();
-                btnComConnect.Text = "Connect";
-                btnComConnect.BackColor = Color.LightCoral;
-                grBCom.Enabled = true;
-            }
-        }
+        //            mySerial.Open();
+        //            mySerial.ReadExisting();
+        //            btnComConnect.Text = "Disconnect";
+        //            btnComConnect.BackColor = Color.SpringGreen;
+        //            //SerialToolStripLabel.Text = "Serial Status: Connected ; " + CBCom.Items[CBCom.SelectedIndex].ToString() +
+        //            //    ", " + serialPort.BaudRate +
+        //            //    ", " + serialPort.DataBits +
+        //            //    ", " + serialPort.StopBits +
+        //            //    ", " + serialPort.Parity;
+        //            UpdateDebug("Serial Connected - " + CBCom.Items[CBCom.SelectedIndex].ToString() + " : " + mySerial.BaudRate + "\n");
+        //            grBCom.Enabled = false;
+        //        }
+        //        catch (UnauthorizedAccessException SerialException)
+        //        {
+        //            MessageBox.Show(SerialException.ToString(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //        }
+        //        catch (System.IO.IOException SerialException)
+        //        {
+        //            MessageBox.Show(SerialException.ToString(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            mySerial.Close();
+        //        }
+        //        catch (InvalidOperationException SerialException)
+        //        {
+        //            MessageBox.Show(SerialException.ToString(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            mySerial.Close();
+        //        }
+        //        catch (Exception xxx)
+        //        {
+        //            MessageBox.Show("Unkonown Error\n" + xxx.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            mySerial.Close();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        mySerial.Close();
+        //        btnComConnect.Text = "Connect";
+        //        btnComConnect.BackColor = Color.LightCoral;
+        //        grBCom.Enabled = true;
+        //    }
+        //}
 
 
         //-------------------------------- Testing ----------------------------------------
@@ -342,6 +359,27 @@ namespace BF3_Main_Controller
             
         }
 
-        
+        private void button5_Click(object sender, EventArgs e)
+        {
+            mySerHan.test("This is a test");
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            UpdateSerHan("Huzza i can talk");
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            if(mySerial.IsOpen)
+            {
+                mySerial.WriteLine("TEST");
+                Console.WriteLine("Written \"TEST\" to serial port " + mySerial.PortName);
+            }
+            else
+            {
+                Console.WriteLine("Serial Port is closed");
+            }
+        }
     }
 }

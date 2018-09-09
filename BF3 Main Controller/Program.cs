@@ -15,7 +15,8 @@ namespace BF3_Main_Controller
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMainMenu());
+            Application.Run(new MainClass());
+            //Application.Run(new frmMainMenu());
         }
     }
 
