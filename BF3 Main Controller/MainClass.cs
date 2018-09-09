@@ -14,6 +14,7 @@ namespace BF3_Main_Controller
     {
         frmMainMenu myForm;
         SerialPort mySerial = new SerialPort();
+        serialHandle mySerHan;
 
         public MainClass()
         {
@@ -22,7 +23,8 @@ namespace BF3_Main_Controller
 
         private void MainClass_Load(object sender, EventArgs e)
         {
-            myForm = new frmMainMenu(mySerial);
+            mySerHan = new serialHandle(mySerial);
+            myForm = new frmMainMenu(mySerial, mySerHan);
             myForm.Show();
         }
 

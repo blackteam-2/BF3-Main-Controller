@@ -74,6 +74,73 @@ namespace BF3_Main_Controller
         public string Name { get => _name; set => _name = value; }
     }
 
+    public class serialFrame
+    {
+        private byte _RecAddy;
+        private byte _SendAddy;
+        private byte _ModuleType;
+        private byte _Command;
+        private UInt32 _Data;
+        private byte _CRC;
+
+        public byte RecAddy { get => _RecAddy; set => _RecAddy = value; }
+        public byte SendAddy { get => _SendAddy; set => _SendAddy = value; }
+        public byte ModuleType { get => _ModuleType; set => _ModuleType = value; }
+        public byte Command { get => _Command; set => _Command = value; }
+        public uint Data { get => _Data; set => _Data = value; }
+        public byte CRC { get => _CRC; set => _CRC = value; }
+
+        public serialFrame(byte recAddy, byte sendAddy, byte moduleType, byte command, UInt32 data, byte crc)
+        {
+            _RecAddy = recAddy;
+            _SendAddy = sendAddy;
+            _ModuleType = moduleType;
+            _Command = command;
+            _Data = data;
+            _CRC = crc;
+        }
+    }
+
+    //public static class Crc8
+    //{
+    //    static byte[] table = new byte[256];
+    //    // x8 + x7 + x6 + x4 + x2 + 1
+    //    const byte poly = 0xd5;
+
+    //    public static byte ComputeChecksum(params byte[] bytes)
+    //    {
+    //        byte crc = 0;
+    //        if (bytes != null && bytes.Length > 0)
+    //        {
+    //            foreach (byte b in bytes)
+    //            {
+    //                crc = table[crc ^ b];
+    //            }
+    //        }
+    //        return crc;
+    //    }
+
+    //    static Crc8()
+    //    {
+    //        for (int i = 0; i < 256; ++i)
+    //        {
+    //            int temp = i;
+    //            for (int j = 0; j < 8; ++j)
+    //            {
+    //                if ((temp & 0x80) != 0)
+    //                {
+    //                    temp = (temp << 1) ^ poly;
+    //                }
+    //                else
+    //                {
+    //                    temp <<= 1;
+    //                }
+    //            }
+    //            table[i] = (byte)temp;
+    //        }
+    //    }
+    //}
+
     public class TextArgs : EventArgs
     {
         private string _Message;

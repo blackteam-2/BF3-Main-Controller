@@ -22,10 +22,11 @@ namespace BF3_Main_Controller
         private serialHandle mySerHan;
         private SerialPort mySerial = new SerialPort();
 
-        public frmMainMenu(SerialPort serial)
+        public frmMainMenu(SerialPort serial, serialHandle serHan)
         {
             InitializeComponent();
             mySerial = serial;
+            mySerHan = serHan;
         }
 
         private void frmMainMenu_Load(object sender, EventArgs e)
@@ -375,6 +376,7 @@ namespace BF3_Main_Controller
             {
                 mySerial.WriteLine("TEST");
                 Console.WriteLine("Written \"TEST\" to serial port " + mySerial.PortName);
+                mySerHan.test();
             }
             else
             {
